@@ -78,6 +78,20 @@
     #include "hiprand/hiprand_rocm.h"
 #elif defined(__HIP_PLATFORM_NVIDIA__)
     #include "hiprand/hiprand_nvcc.h"
+#else
+    struct hiprandGenerator_st {
+        //nothing need to be done for now
+    };
+
+    struct hiprandDiscreteDistribution_st {
+        //nothing need to be done for now
+    };
+
+    /// \brief Convenience typedef for Sobol 32 direction vector array
+    typedef unsigned int       hiprandDirectionVectors32_t[32];
+
+    /// \brief Convenience typedef for Sobol 64 direction vector array
+    typedef unsigned long long hiprandDirectionVectors64_t[64];
 #endif
 
 /// \cond HIPRAND_DOCS_TYPEDEFS

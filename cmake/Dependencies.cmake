@@ -32,7 +32,7 @@ include(cmake/DownloadProject.cmake)
 #       This makes it possible that different rocRAND headers are found than those of the package found with
 #       find_package. CMake option CMAKE_NO_SYSTEM_FROM_IMPORTED can be used to change the -isystem to -I and to
 #       workaround this problem.
-if (NOT BUILD_WITH_LIB STREQUAL "CUDA")
+if (NOT BUILD_WITH_LIB STREQUAL "CUDA" AND NOT USE_CHIP)
     if (NOT ROCRAND_PATH STREQUAL "")
         # Search manually-specified rocRAND path.
         # This assumes that there is no system-installed rocRAND or that CMAKE_NO_SYSTEM_FROM_IMPORTED is ON.
@@ -70,7 +70,7 @@ if (NOT BUILD_WITH_LIB STREQUAL "CUDA")
 endif ()
 
 # Fortran Wrapper
-if(BUILD_FORTRAN_WRAPPER)
+if(BUILD_FORTRAN_WRAPPER AND NOT USE_CHIP)
     enable_language(Fortran)
 endif()
 

@@ -64,8 +64,10 @@ if (BUILD_WITH_LIB STREQUAL "CUDA")
   set(ROCRAND_PATH "" CACHE INTERNAL "")
   set(ROCRAND_ROOT "" CACHE INTERNAL "")
 else()
-  set(ROCRAND_PATH "" CACHE PATH "Path to rocRAND install.")
-  set(ROCRAND_ROOT "${CMAKE_CURRENT_BINARY_DIR}/deps/rocrand" CACHE PATH "Path to downloaded rocRAND install.")
+  if(NOT USE_CHIP)
+    set(ROCRAND_PATH "" CACHE PATH "Path to rocRAND install.")
+    set(ROCRAND_ROOT "${CMAKE_CURRENT_BINARY_DIR}/deps/rocrand" CACHE PATH "Path to downloaded rocRAND install.")
+  endif()
 endif()
 
 set(HIPRAND_CONFIG_DIR "\${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}" CACHE PATH "Path placed into ldconfig file")
@@ -117,7 +119,7 @@ endif()
 
 # Verify that hipcc or HIP-aware clang is used on ROCM software
 # TODO: Fix VerifyCompiler for Windows
-if (NOT WIN32)
+if (NOT WIN32 AND NOT USE_CHIP)
   include(cmake/VerifyCompiler.cmake)
 else()
   list(APPEND CMAKE_PREFIX_PATH ${ROCM_PATH} ${ROCM_PATH}/hip ${ROCM_PATH}/llvm)

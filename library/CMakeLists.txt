@@ -24,6 +24,8 @@
 # Get hipRAND sources
 if (BUILD_WITH_LIB STREQUAL "CUDA")
     set(hipRAND_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia_detail/hiprand.cpp)
+elseif(USE_CHIP)
+    set(hipRAND_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/intel_detail/hiprand.cpp)
 else()
     set(hipRAND_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/amd_detail/hiprand.cpp)
 endif()
@@ -71,7 +73,11 @@ if (BUILD_WITH_LIB STREQUAL "CUDA")
     )
 else()
     target_link_libraries(hiprand PRIVATE hip::device)
-    target_link_libraries(hiprand PUBLIC roc::rocrand hip::host)
+    if (USE_CHIP)
+        target_link_libraries(hiprand PUBLIC hip::host)
+    else()
+        target_link_libraries(hiprand PUBLIC roc::rocrand hip::host)
+    endif()
 endif()
 
 if(NOT BUILD_SHARED_LIBS)
@@ -93,34 +99,36 @@ rocm_install(
     EXPORT hiprand-targets
 )
 
-set(FORTRAN_SRCS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/hiprand/src/fortran")
-set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
-set(CONFIG_PACKAGE_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/hiprand)
+if(NOT USE_CHIP)
+    set(FORTRAN_SRCS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/hiprand/src/fortran")
+    set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+    set(CONFIG_PACKAGE_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/hiprand)
 
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    src/hiprand-fortran-config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/hiprand-fortran-config.cmake
-    INSTALL_DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
-)
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        src/hiprand-fortran-config.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/hiprand-fortran-config.cmake
+        INSTALL_DESTINATION ${CONFIG_PACKAGE_INSTALL_DIR}
+    )
 
-if (BUILD_WITH_LIB STREQUAL "CUDA")
-    rocm_export_targets(
-        TARGETS hip::hiprand
-        NAME hiprand
-        NAMESPACE hip::
-        INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/hiprand-fortran-config.cmake"
-    )
-else()
-    rocm_export_targets(
-        TARGETS hip::hiprand
-        NAME hiprand
-        NAMESPACE hip::
-        DEPENDS PACKAGE hip
-        DEPENDS PACKAGE rocrand
-        STATIC_DEPENDS PACKAGE rocrand
-        INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/hiprand-fortran-config.cmake"
-    )
+    if (BUILD_WITH_LIB STREQUAL "CUDA")
+        rocm_export_targets(
+            TARGETS hip::hiprand
+            NAME hiprand
+            NAMESPACE hip::
+            INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/hiprand-fortran-config.cmake"
+        )
+    else()
+        rocm_export_targets(
+            TARGETS hip::hiprand
+            NAME hiprand
+            NAMESPACE hip::
+            DEPENDS PACKAGE hip
+            DEPENDS PACKAGE rocrand
+            STATIC_DEPENDS PACKAGE rocrand
+            INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/hiprand-fortran-config.cmake"
+        )
+    endif()
 endif()
 
 if(BUILD_FILE_REORG_BACKWARD_COMPATIBILITY AND NOT WIN32)

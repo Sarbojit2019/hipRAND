@@ -68,11 +68,15 @@ typedef struct hiprandStateXORWOW hiprandStateXORWOW_t;
  * \brief Deprecated alias of hiprandStateXORWOW_t
  * \deprecated Please use hiprandStateXORWOW_t directly.
  */
-typedef hiprandStateXORWOW_t hipRandState_t;
+typedef hiprandStateXORWOW_t hiprandState_t;
 
 /**
  * \brief PHILOX PRNG state type
  */
+struct hiprandStatePhilox4_32_10 {
+    //empty for Intel
+};
+
 typedef struct hiprandStatePhilox4_32_10 hiprandStatePhilox4_32_10_t;
 
 /**
@@ -108,8 +112,10 @@ typedef struct hiprandStateSobol64 hiprandStateSobol64_t;
 
 #if defined(__HIP_PLATFORM_AMD__)
     #include "hiprand/hiprand_kernel_rocm.h"
-#else
+#elif defined(__HIP_PLATFORM_NVIDIA__)
     #include "hiprand/hiprand_kernel_nvcc.h"
+#else
+    #include "hiprand/hiprand_kernel_intel.h"
 #endif
 
 #endif // HIPRAND_KERNEL_H_
